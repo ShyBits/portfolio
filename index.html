@@ -86,16 +86,6 @@
     .blob::before{
       content:"";
       position:absolute; inset:0; border-radius:inherit; pointer-events:none;
-      background:
-        linear-gradient(115deg,
-          rgba(255,255,255,0) 40%,
-          rgba(255,255,255,.55) 50%,
-          rgba(255,255,255,0) 60%) no-repeat,
-        radial-gradient(120% 140% at 25% 22%,
-          rgba(255,255,255,.38),
-          rgba(255,255,255,.08) 35%,
-          rgba(255,255,255,.02) 55%,
-          transparent 60%) no-repeat;
       background-size: 280% 280%, 100% 100%;
       background-position: -140% -140%, center;
       mix-blend-mode: screen;
@@ -252,7 +242,28 @@
       .right{padding:0 8vw}
       .dock{bottom:2vh}
     }
+    .profile {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      translate: -5% -5%;
+      width: clamp(80px, 14vmin, 180px);
+      height: clamp(80px, 14vmin, 180px);
+      border-radius: 50%;
+      overflow: hidden;
+      background: url("a3325420-ed32-401e-a76b-3edc892e35e0.png") center/contain no-repeat;
+      z-index: 70000; /* above .core, below petals */
+      box-shadow: 0 8px 28px rgba(0,0,0,.5), 0 0 0 2px rgba(255,255,255,.25);
+      backdrop-filter: blur(6px) saturate(120%);
+    }
 
+    .profile img {
+      width: 100%;
+      height: 100%;
+      display: none; /* hide the old image */
+      object-fit: cover;
+      display: block;
+    }
     /* Hover preview card */
     .hover-preview{position:fixed;inset:auto;left:0;top:0;transform:translate(-50%,-50%) scale(.92);opacity:0;pointer-events:none;z-index:60;transition:opacity .18s ease, transform .2s ease}
     .hover-preview.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
@@ -279,6 +290,9 @@
     <section class="left">
       <div class="orbit" aria-label="Projekte" id="orbit">
         <div class="core" aria-hidden="true"></div>
+        <div class="profile">
+          <img src="a3325420-ed32-401e-a76b-3edc892e35e0.png" alt="Profile Icon">
+        </div>
         <div class="ring" id="ring"></div>
       </div>
     </section>
