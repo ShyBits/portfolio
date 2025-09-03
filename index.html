@@ -6,7 +6,7 @@
   <title>Marco Makawejew — Portfolio</title>
   <style>
     :root{
-      --bg:#0b0f14; --text:#e8ecf1; --muted:#9aa4af; --a:#7c5cff; --b:#00e0b8;
+      --bg:#000000; --text:#e8ecf1; --muted:#9aa4af; --a:#7c5cff; --b:#00e0b8;
       --sel-c1:#7C5CFF; --sel-c2:#00E0B8; --sel-c3:#FFFFFF;
       --glass-blur:18px; --glass-saturate:170%; --glass-bright:1.18; --glass-tint:.08;
     }
@@ -19,13 +19,6 @@
     .stage{position:fixed;inset:0;display:grid;grid-template-columns:min(46vw,720px) 1fr;align-items:center}
     .left{position:relative;height:100%;display:grid;grid-template-rows:1fr auto;align-items:center;justify-items:center;padding-bottom:6vh}
     .right{position:relative;height:100%;display:grid;place-items:center;padding-right:5vw}
-
-    .bg::before{content:"";position:fixed;inset:-20vmax;z-index:-2;pointer-events:none;
-      background:
-        radial-gradient(60vmax 40vmax at 10% 90%, rgba(124,92,255,.18), transparent 60%),
-        radial-gradient(50vmax 35vmax at 90% 10%, rgba(0,224,184,.16), transparent 60%),
-        conic-gradient(from 90deg at 50% 50%, rgba(255,255,255,.03), transparent 30%);
-      filter:saturate(110%)}
 
     /* ===== Identity oben links ===== */
     .identity{
@@ -101,7 +94,7 @@
 
     @keyframes blob-glint{0%{background-position:-140% -140%,center}48%{background-position:0% 0%,center}100%{background-position:160% 160%,center}}
 
-    .core{position:absolute;left:50%;top:50%;translate:-50% -50%;width:clamp(80px,16vmin,200px);height:clamp(80px,16vmin,200px);border-radius:50%;pointer-events:none;background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.12), rgba(124,92,255,.22) 45%, rgba(0,0,0,0) 70%);filter:blur(2px);opacity:.7}
+    .core{position:absolute;left:50%;top:50%;translate:-50% -50%;width:clamp(80px,16vmin,200px);height:clamp(80px,16vmin,200px);border-radius:50%;pointer-events:none;filter:blur(2px);opacity:.7}
     .petal{transform:rotate(calc(var(--theta) + var(--angle)));transform-origin:50% 50%;pointer-events:auto;cursor:pointer}
 
     /* Idle anim (nur nicht-aktive) */
@@ -170,8 +163,7 @@
     /* Profile + Dots */
     .profile{position:absolute;left:50%;top:50%;translate:-5% -5%;
       width:clamp(80px,14vmin,180px);height:clamp(80px,14vmin,180px);border-radius:50%;overflow:hidden;pointer-events:none;
-      background:radial-gradient(60% 60% at 45% 45%, rgba(255,255,255,.06), transparent 70%),
-                 radial-gradient(55% 55% at 55% 60%, rgba(0,0,0,.35), rgba(0,0,0,0) 70%);
+      background:radial-gradient(60%  at 45%, rgba(255,255,255,.06), transparent 70%);
       box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 0 2px rgba(255,255,255,.22);backdrop-filter:blur(6px) saturate(120%)
     }
     .pf-dots{position:absolute;inset:0;border-radius:50%;pointer-events:none}
