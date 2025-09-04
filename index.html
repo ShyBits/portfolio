@@ -696,8 +696,9 @@
 
       // vorher: const base = presenceBase().replace(/\/$/, "");
       const base = (window.PRESENCE_ORIGIN || presenceBase()).replace(/\/$/, "");
-      const proto = base.startsWith("https") ? "wss" : "ws";
-      const wsUrl = base.replace(/^http/, proto) + "/presence";
+      const u = new URL(base);
+      u.protocol = (u.protocol === "https:") ? "wss:" : "ws:";
+      const wsUrl = u.href.replace(/\/$/, "") + "/presence";
       const httpUrl = base + "/online.json";
 
       // 1) Live-Updates per WebSocket
