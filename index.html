@@ -364,6 +364,7 @@
   </div>
 
   <script>
+  window.PRESENCE_ORIGIN = "https://code.makawejew.com/proxy/4000";
   (()=> {
     const $=(q,el=document)=>el.querySelector(q);
     const $$=(q,el=document)=>[...el.querySelectorAll(q)];
@@ -540,10 +541,6 @@
     const next=()=>go(current+1), prev=()=>go(current-1);
 
     /* Besucher-Dots (Center) */
-    async function getVisitorCount(){
-      try{ const res=await fetch('/online.json',{cache:'no-store'}); if(res.ok){ const d=await res.json(); if(typeof d.online==='number') return Math.max(0,d.online|0); } }catch(_){}
-      return Math.max(3, Math.floor(6+Math.random()*8));
-    }
     function renderProfileDots(count){
       const wrap=$('#pfDots'); if(!wrap) return;
       wrap.innerHTML=''; const profile=$('#profile');
@@ -688,36 +685,53 @@
     }, {passive:true});
 
     mount();
-
-    // Profile-Dots initial + Refresh
-    (async ()=>{ renderProfileDots(await getVisitorCount()); })();
-    setInterval(async ()=>{ renderProfileDots(await getVisitorCount()); }, 30000);
-    // Live-Updates per WebSocket (Presence)
     
     (function presenceLive(){
-      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      const url = `${proto}://${location.host}/presence`;
-      let ws;
-
-      function connect(){
-        ws = new WebSocket(url);
-
-        ws.addEventListener('message', (e) => {
-          try {
-            const payload = JSON.parse(e.data);
-            if (payload?.type === 'online' && typeof payload.online === 'number') {
-              renderProfileDots(payload.online);
-            }
-          } catch {}
-        });
-
-        ws.addEventListener('close', () => {
-          // Reconnect mit kleinem Backoff
-          setTimeout(connect, 1500);
-        });
+      // Basis-URL ermitteln: normal (origin) ODER code-server Proxy (/proxy/<port>)
+      function presenceBase(){
+        const m = location.pathname.match(/^\/proxy\/(\d+)\//);
+        if (m) return `${location.origin}/proxy/${m[1]}`;
+        return location.origin;
       }
 
+      // vorher: const base = presenceBase().replace(/\/$/, "");
+      const base = (window.PRESENCE_ORIGIN || presenceBase()).replace(/\/$/, "");
+      const proto = base.startsWith("https") ? "wss" : "ws";
+      const wsUrl = base.replace(/^http/, proto) + "/presence";
+      const httpUrl = base + "/online.json";
+
+      // 1) Live-Updates per WebSocket
+      let ws;
+      function connect(){
+        ws = new WebSocket(wsUrl);
+
+        ws.addEventListener("message", (e) => {
+          try{
+            const payload = JSON.parse(e.data);
+            if (payload?.type === "online" && typeof payload.online === "number"){
+              renderProfileDots(payload.online);
+            }
+          }catch{}
+        });
+
+        ws.addEventListener("close", () => {
+          setTimeout(connect, 1500); // Reconnect
+        });
+      }
       connect();
+
+      // 2) Fallback-Polling (optional, falls WS mal nicht geht)
+      async function pollOnce(){
+        try{
+          const res = await fetch(httpUrl, { cache: "no-store" });
+          if (res.ok){
+            const d = await res.json();
+            if (typeof d.online === "number") renderProfileDots(d.online);
+          }
+        }catch{}
+      }
+      pollOnce();
+      setInterval(pollOnce, 30000);
     })();
   })();
   </script>
