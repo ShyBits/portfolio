@@ -77,6 +77,6 @@ function broadcastCount() {
 
 // ---- Start ----
 const PORT = process.env.PORT || 4000;
-server.listen(PORT, () => {
-  console.log(`Presence server on http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Presence server on http://0.0.0.0:${PORT}`);
 });
