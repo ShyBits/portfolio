@@ -1,0 +1,1 @@
+echo "re:(gh(p|o|u|s|r)_[A-Za-z0-9]{20,})==>REMOVED_GITHUB_TOKEN" > replacements.txt
