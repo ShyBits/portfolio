@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marco Makawejew — Portfolio</title>
+  <style>
+    :root{
+      --bg:#000000; --text:#e8ecf1; --muted:#9aa4af; --a:#7c5cff; --b:#00e0b8;
+      --sel-c1:#73C3FF; --sel-c2:#A7D8FF; --sel-c3:#FFFFFF;
+      --glass-blur:18px; --glass-saturate:170%; --glass-bright:1.18; --glass-tint:.08;
+      --dot-base: color-mix(in srgb, var(--sel-c2) 65%, #fff 20%);
+      --dot-accent: color-mix(in srgb, var(--sel-c1) 35%, transparent);
+      /* Dots */
+      --dot-self-core:#C3B8FF;   /* lila Kern für dich */
+      --dot-self-glow:#A996FF;   /* lila Glow für dich */
+
+      --dot-other-core:#A7D8FF;  /* hellblauer Kern für andere */
+      --dot-other-glow:#73C3FF;  /* hellblauer Glow für andere */
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;overflow:hidden;background:var(--bg);color:var(--text);
+      font:500 14px/1.55 Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+
+    /* ===== Layout ===== */
+    .stage{position:fixed;inset:0;display:grid;grid-template-columns:min(46vw,720px) 1fr;align-items:center}
+    .left{position:relative;height:100%;display:grid;grid-template-rows:1fr auto;align-items:center;justify-items:center;padding-bottom:6vh; perspective: 1100px;perspective-origin: 50% 45%;}
+    .right{position:relative;height:100%;display:grid;place-items:center;padding-right:5vw}
+
+    /* ===== Identity oben links ===== */
+    .identity{
+      position:fixed;
+      left:2.8vw;
+      top:3.2vh;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      z-index:9999;
+
+      max-width: 32vw;
+      padding-right: 2vw;
+    }
+    @media (max-width:1200px){
+      .identity{
+        max-width: 40vw;
+        top:2vh;
+        left:2vw;
+        padding-right:4vw;
+      }
+      .tagline{font-size:clamp(20px,4vw,44px)}
+    }
+    .name-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .identity .name{margin:0;font-weight:900;letter-spacing:.2px;font-size:clamp(18px,2.2vw,28px)}
+    .skill-icons{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .skill-icons img{height:20px;width:20px;object-fit:contain;opacity:.92;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+    .identity .role{color:var(--muted);font-weight:700}
+
+    .identity .bio{opacity:.95;font-size:clamp(13px,1.15vw,15px)}
+    .bio b{font-weight:900;color:#fff}
+    .hl{
+      padding:0 .25em;border-radius:.35em;
+      background:linear-gradient(90deg,
+        color-mix(in srgb, var(--sel-c1) 22%, transparent),
+        color-mix(in srgb, var(--sel-c2) 22%, transparent));
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+      font-weight:800;
+    }
+    .key{color:color-mix(in srgb, var(--sel-c2) 85%, white 10%);font-weight:800}
+    .tagline{
+      margin: 2px 0 2px;
+      font-weight: 1000;
+      line-height: 1.04;
+      letter-spacing:.2px;
+      font-size: clamp(24px, 4vw, 56px);
+    }
+    .tagline .accent{
+      position: relative;
+      background: linear-gradient(90deg, var(--sel-c1), var(--sel-c2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 24px color-mix(in srgb, var(--sel-c1) 35%, transparent);
+    }
+    .tagline .accent::after{
+      content:"";
+      position:absolute; left:-2px; right:-2px; bottom:-6px; height:8px;
+      background: linear-gradient(90deg, var(--sel-c1), var(--sel-c2));
+      opacity:.22; filter: blur(10px);
+      border-radius: 12px;
+    }
+
+    .subline{
+      margin-top: 8px;
+      color: color-mix(in srgb, var(--text) 88%, transparent);
+      font-weight: 800;
+      letter-spacing:.25px;
+      opacity:.95;
+    }
+
+    /* ===== Orbit ===== */
+    .orbit{--angle:0deg;--R:clamp(260px,38vmin,520px);position:relative;width:100%;height:100%;display:grid;place-items:center;transform-style: preserve-3d;transform: rotateX(var(--tiltX, 0deg)) rotateY(var(--tiltY, 0deg));transition: transform 160ms cubic-bezier(.2,.8,.2,1);}
+    .ring{position:absolute;inset:0;display:grid;place-items:center}
+
+    .node{--theta:0deg;--r:300px;--s:1;--offset:0px;position:absolute;left:50%;top:50%;
+      transform:
+        rotate(calc(var(--theta) + var(--angle)))
+        translate(calc(var(--r) + var(--offset)))
+        rotate(calc(-1 * (var(--theta) + var(--angle))));
+      transition:transform 1s cubic-bezier(.25,.9,.1,1), filter .45s, opacity .45s;
+      filter:none !important;
+      appearance:none;background:transparent;border:0;padding:0;outline:none;pointer-events:auto;cursor:pointer;
+    }
+    .node:hover { --offset: clamp(12px, 2.5vmin, 32px); z-index: 60000; }
+    .node.active{z-index:65000;--offset: calc((var(--R) - var(--r)) + clamp(18px,8vmin,140px));}
+    .blob,
+    .blob::before,
+    .blob::after{
+      backface-visibility: hidden;
+      transform: translateZ(0);           /* promote to its own layer */
+      -webkit-transform: translateZ(0);
+      clip-path: inset(0 round 50%);      /* hard clip to a circle */
+      contain: paint;                      /* isolate painting */
+    }
+    .blob.as-hole{
+      background:
+        radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.08), rgba(255,255,255,0) 70%),
+        radial-gradient(72% 72% at 50% 50%, transparent 62%, rgba(255,255,255,.14) 63%, transparent 66%),
+        rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow: none !important;
+    }
+    .blob.as-hole::before,
+    .blob.as-hole::after{ opacity:0 !important; }
+    .node.holed { --offset: 0 !important; }
+    .node.holed .hole{ opacity:1; animation: holePulse 1800ms ease-in-out infinite; }
+    .node.holed .blob { visibility: hidden !important; }
+
+    @keyframes holePulse {
+      0%   { box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), 0 0 10px rgba(0,0,0,0); }
+      70%  { box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), 0 0 28px color-mix(in srgb, var(--sel-c1) 24%, transparent); }
+      100% { box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), 0 0 10px rgba(0,0,0,0); }
+    }
+
+    .blob{
+      --size:clamp(88px,16vmin,200px);--g:1;
+      width:calc(var(--size)*var(--s));aspect-ratio:1/1;border-radius:50%;
+      position:relative;overflow:hidden;cursor:pointer;will-change:transform,filter,backdrop-filter;
+      transform:translateY(var(--bob,0px)) rotate(var(--twist,0deg)) scaleX(1.3) scaleY(0.82) scale(calc(var(--g) + var(--breath,0)));
+      transition:transform .45s ease, box-shadow .45s ease, filter .3s ease;
+      backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-bright));
+      -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-bright));
+      background:
+        linear-gradient(var(--grad,135deg),
+          color-mix(in srgb, var(--c1) 24%, transparent) 0%,
+          color-mix(in srgb, var(--c2) 24%, transparent) 100%),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.02)),
+        rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.28);
+      box-shadow:none !important;
+    }
+    .blob::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+      background-size:280% 280%,100% 100%;background-position:-140% -140%,center;mix-blend-mode:screen;opacity:.95;
+      backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate)) brightness(var(--glass-bright));
+      transition:opacity .2s ease;animation:blob-glint 4s ease-in-out infinite paused}
+    .blob::after{content:"";position:absolute;pointer-events:none;inset: 0;border-radius: 50%;overflow: hidden;;
+      background:
+        conic-gradient(from 180deg at 50% 50%, rgba(255,255,255,.10), rgba(255,255,255,0) 25% 75%, rgba(255,255,255,.10) 100%),
+        radial-gradient(36% 60% at 65% 72%, rgba(255,255,255,.10), rgba(255,255,255,0)),
+        var(--img) center/cover no-repeat;
+      mix-blend-mode:overlay;opacity:.32}
+
+    .node:hover .blob{filter:saturate(120%) contrast(1.06)}
+    .node:hover .blob::before{animation-play-state:running}
+
+    .node.active .blob{border-color:transparent !important;box-shadow:none !important}
+    .node.active .blob::before{animation:none}
+
+    @keyframes blob-glint{0%{background-position:-140% -140%,center}48%{background-position:0% 0%,center}100%{background-position:160% 160%,center}}
+
+    .core{position:absolute;left:50%;top:50%;translate:-50% -50%;width:clamp(80px,16vmin,200px);height:clamp(80px,16vmin,200px);border-radius:50%;pointer-events:none;filter:blur(2px);opacity:.7}
+    .petal{
+      position: relative;
+      display: grid;
+      place-items: center;
+      transform: rotate(calc(var(--theta) + var(--angle))) translateZ(var(--z, 0px));
+      transform-origin: 50% 50%;
+      pointer-events: auto;
+      cursor: pointer;
+      transform-style: preserve-3d;
+    }
+    @media (prefers-reduced-motion: reduce){ .orbit{ transition: none; } }
+    @property --bob{syntax:'<length>';inherits:false;initial-value:0px}
+    @property --twist{syntax:'<angle>';inherits:false;initial-value:0deg}
+    @keyframes petalFloat{0%,100%{--bob:0px}50%{--bob:var(--float,6px)}}
+    @keyframes petalSway{0%,100%{--twist:calc(var(--sway,2deg) * -1)}50%{--twist:var(--sway,2deg)}}
+    .node .blob{animation:petalFloat var(--idle-dur,7s) ease-in-out var(--idle-delay,0s) infinite,
+                       petalSway  calc(var(--idle-dur,7s)*1.2) ease-in-out var(--idle-delay,0s) infinite; transition: transform .45s ease, filter .3s ease}
+    .node:hover .blob{animation-play-state:paused}
+    @media (prefers-reduced-motion:no-preference){
+      .orbit.is-hovering .blob{
+        -webkit-backdrop-filter: blur(12px) saturate(120%) brightness(1.12);
+                backdrop-filter: blur(12px) saturate(120%) brightness(1.12);
+      }
+    }
+    /* ===== Expanded rechts ===== */
+    #expanded{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      overflow: visible;
+    }
+    .blob.mega{
+      --size:clamp(88px,16vmin,200px);
+      width:calc(var(--size) * 7.5);
+      aspect-ratio:1/1;border-radius:50%;
+      position:absolute;left:calc(100% + 5vw);top:50%;
+      --stretch-x:2.2;
+      transform:translate(-50%, -50%) scaleX(var(--stretch-x)) scaleY(2);
+      animation:none;border-color:transparent;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.36), inset 0 -20px 36px rgba(0,0,0,.28) !important;
+      cursor: default;
+      user-select: none;
+    }
+    .blob.mega::before{animation:none;opacity:.9}
+    .mega-inner{
+      position:absolute;
+      inset:6% 8%;
+      transform: scaleX(calc(1 / var(--stretch-x))) scaleY(0.5);
+      transform-origin:center;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      pointer-events:auto;
+      overflow:auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.3) transparent;
+      -webkit-mask-image: radial-gradient(120% 95% at 50% 50%, #000 72%, transparent 100%);
+              mask-image: radial-gradient(120% 95% at 50% 50%, #000 72%, transparent 100%);
+    }
+    .mega-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .mega-body{ display:grid; gap:10px; }
+    .mega-hero{
+      width:100%; aspect-ratio:21/9; border-radius:14px;
+      background:var(--img) center/cover no-repeat;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -10px 24px rgba(0,0,0,.25);
+    }
+    .mega-desc{ opacity:.92; line-height:1.35 }
+
+    .pill-btn{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 12px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(255,255,255,.06);
+      font-weight:800; font-size:12px; text-decoration:none; color:inherit;
+    }
+    .pill-btn:hover{ background:rgba(255,255,255,.12) }
+    .mega-title{ margin:0; font-weight:1000; letter-spacing:.2px; font-size:clamp(18px,1.4vw,22px); }
+    .mega-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px; }
+    .mega-card{
+      background:rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:14px;
+      padding:10px;
+      backdrop-filter:blur(6px) saturate(140%);
+      -webkit-backdrop-filter:blur(6px) saturate(140%);
+    }
+    .mega-card .thumb{
+      width:100%; aspect-ratio:16/9; border-radius:10px;
+      background:var(--img) center/cover no-repeat;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -8px 24px rgba(0,0,0,.25);
+    }
+    .mega-card .title{font-weight:900;margin-top:8px}
+    .mega-card .desc{font-size:12px;line-height:1.3;opacity:.9}
+    .mega-card .links{display:flex;gap:8px;margin-top:8px}
+    .mega-card .btn{
+      flex:0 0 auto; padding:6px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.24); background:rgba(255,255,255,.06);
+      font-weight:800;font-size:12px; text-decoration:none;color:inherit; cursor:pointer;
+    }
+    .mega-card .btn:hover{background:rgba(255,255,255,.12)}
+    .blob.fly{position:fixed;left:0;top:0;z-index:100000;pointer-events:none;animation:none !important;transform-origin:center center;border-radius:50%}
+    .blob.fly.anim{transition:transform .7s cubic-bezier(.18,.9,.2,1),box-shadow .7s cubic-bezier(.18,.9,.2,1)}
+
+    /* ===== Dock ===== */
+    .dock{
+      position:absolute;
+      left: 22%;
+      bottom:clamp(50px,10vh,100px);
+      z-index:300;
+      display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;
+      max-width:86%;
+      padding:8px 12px;border-radius:999px;
+      background:rgba(255, 255, 255, 0.05);backdrop-filter:blur(8px) saturate(120%);
+      border:1px solid rgba(255, 255, 255, 0.4)
+    }
+    .dock-item{
+      width:36px;height:36px;border-radius:50%;flex:0 0 auto;cursor:pointer;opacity:.78;
+      transition:opacity .15s, transform .15s, box-shadow .15s;
+      border:1px solid rgba(255, 255, 255, 0.4);
+      background: black;
+    }
+    .dock-item:hover{opacity:1;transform:translateY(-1px)}
+    .dock-item.active{opacity:1;box-shadow:0 0 0 2px var(--a),0 8px 24px rgba(0,0,0,.35);border-color:rgba(255,255,255,.35)}
+
+    @media (max-width:980px){
+      .stage{grid-template-columns:1fr}
+      .right{padding:0 8vw}
+      .skill-icons img{height:18px;width:18px}
+    }
+    .activity{
+      margin-top:10px;
+      display:grid; gap:6px;
+      max-width:36ch; /* stays tidy near your headline */
+    }
+    .commit{
+      display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
+      padding:8px 10px; border-radius:12px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      backdrop-filter:blur(8px) saturate(130%);
+      -webkit-backdrop-filter:blur(8px) saturate(130%);
+      font-weight:700;
+    }
+    .commit .dot{ width:8px; height:8px; border-radius:50%; background: var(--sel-c1); box-shadow:0 0 10px color-mix(in srgb, var(--sel-c1) 50%, transparent); }
+    .commit .msg{
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      opacity:.95;
+    }
+    .commit .meta{
+      font-size:12px; color:var(--muted); font-weight:800; white-space:nowrap;
+    }
+    .commit a{ color:inherit; text-decoration:none; }
+    .commit a:hover{ text-decoration:underline; }
+    /* Hover Card */
+    .hover-preview{position:fixed;left:0;top:0;z-index:999999;width:min(36ch,32vw);max-width:360px;pointer-events:none;opacity:0;transform:translate3d(0,0,0) scale(.98);transition:opacity .15s ease, transform .18s ease;background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.38));border-radius:16px;border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px) saturate(140%);box-shadow:0 18px 42px rgba(0,0,0,.5), 0 0 0 2px color-mix(in srgb, var(--sel-c1) 28%, transparent)}
+    .hover-preview.show{opacity:1;transform:translate3d(0,0,0) scale(1)}
+    .hp-media{aspect-ratio:16/9;width:100%;background:var(--hp, none) center/cover no-repeat;border-radius:12px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.22), inset 0 -10px 24px rgba(0,0,0,.25)}
+    .hp-label{font-weight:900;letter-spacing:.25px;padding:10px 12px 0 12px}
+    .hp-desc{color:rgba(255,255,255,.9);padding:4px 12px 12px 12px;font-size:13px;line-height:1.35;opacity:.95;border-top:1px solid rgba(255,255,255,.08)}
+    .blob.mega.hidden{opacity:0;visibility:hidden;pointer-events:none}
+
+    /* Profile + Dots */
+    .profile{
+      position:absolute;left:50%;top:50%;translate:-5% -5%;
+      width:clamp(80px,14vmin,180px);height:clamp(80px,14vmin,180px);border-radius:50%;overflow:hidden;pointer-events:none;
+      background:radial-gradient(60% at 45%, rgba(255,255,255,.06), transparent 70%);
+      box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 0 2px rgba(255,255,255,.22);backdrop-filter:blur(6px) saturate(120%)
+    }
+    .pf-dots { position:absolute; inset:0; border-radius:50%; pointer-events:none; }
+
+    /* Base dot styling (no background; core & halo handled by pseudo elements) */
+    .pf-dots .dot{
+      position:absolute; left:50%; top:50%;
+      translate:-50% -50%;
+      width:clamp(7px,1.6vmin,12px); aspect-ratio:1;
+      opacity:0;
+      transform: translate(
+        calc(var(--dx,0px) + var(--trailX,0px)),
+        calc(var(--dy,0px) + var(--trailY,0px))
+      ) scale(.75);
+      transition:
+        opacity .35s ease,
+        transform .35s ease,
+        filter .35s ease;
+      filter: saturate(1.05) contrast(1.04);
+      animation:
+        drift var(--dur,8s) ease-in-out var(--delay,0s) infinite,
+        twinkle 2200ms ease-in-out var(--twinkle-delay,0ms) infinite alternate;
+    }
+
+    /* “You” dot gets brand gradient + stronger halo */
+    .pf-dots .dot.self{
+      --core: var(--dot-self-core);
+      --halo: var(--dot-self-glow);
+    }
+
+    /* Others share a unified turquoise tone */
+    .pf-dots .dot.other{
+      --core: var(--dot-other-core);
+      --halo: var(--dot-other-glow);
+    }
+
+    /* Core */
+    .pf-dots .dot::before{
+      content:"";
+      position:absolute; inset:0;
+      border-radius:50%;
+      background:
+        radial-gradient(65% 65% at 35% 35%, rgba(255,255,255,.95), rgba(255,255,255,0) 62%),
+        radial-gradient(100% 100% at 50% 50%, var(--core), var(--core));
+      box-shadow:inset 0 0 2px rgba(0,0,0,.25);
+    }
+
+    /* Halo */
+    .pf-dots .dot::after{
+      content:"";
+      position:absolute; inset:-40%;
+      border-radius:50%;
+      background: radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--halo) 65%, transparent), transparent 70%);
+      filter: blur(6px);
+      opacity:.6;
+      animation: haloPulse 2400ms ease-in-out infinite;
+    }
+
+    /* Entry / exit */
+    .pf-dots .dot.enter { opacity:1; transform: translate(calc(var(--dx,0px) + var(--trailX,0px)), calc(var(--dy,0px) + var(--trailY,0px))) scale(1); }
+    .pf-dots .dot.leave { opacity:0; transform: translate(calc(var(--dx,0px) + var(--trailX,0px)), calc(var(--dy,0px) + var(--trailY,0px))) scale(.4); filter: blur(2px); }
+
+    /* Subtle trail highlight on hover push */
+    .pf-dots .dot.trail::after {
+      opacity:.85;
+      filter: blur(8px);
+    }
+
+    /* Animations (reuse your existing drift/twinkle durations) */
+    @keyframes haloPulse {
+      0%   { transform: scale(.9); opacity:.55; }
+      50%  { transform: scale(1.08); opacity:.8; }
+      100% { transform: scale(.9); opacity:.55; }
+    }
+
+    @keyframes drift {
+      0%,100% { transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -1)) scale(1); }
+      50%     { transform: translate(var(--dx), var(--dy)) scale(1.02); }
+    }
+
+    @keyframes twinkle {
+      0%   { filter: brightness(1); }
+      100% { filter: brightness(1.08); }
+    }
+        /* --- GitHub heatmap panel --- */
+    /* --- GitHub heatmap panel (classic squares) --- */
+    .gh-heatmap{
+      position:fixed;
+      right:20px;
+      bottom:0;              /* <--- always pinned to bottom */
+      z-index:999999;
+
+      width:220px;
+      height:180px;
+      padding:12px;
+
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr) auto;
+      gap:8px;
+
+      background:rgba(0,0,0,.75);
+      border:1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      box-shadow:0 12px 28px rgba(0,0,0,.6);
+      border-top-left-radius:16px;
+      border-top-right-radius:16px;
+      border-bottom-left-radius:0;
+      border-bottom-right-radius:0;
+
+      transition:height .3s ease, width .3s ease;
+      overflow:hidden;
+    }
+    .gh-heatmap.expanded{
+      height:100vh;
+      top:auto;
+      bottom:20px;              /* stay bottom-anchored even when expanded */
+      height:calc(100vh - 40px);
+    }
+
+    .gh-heatmap.resizing{
+      transition: none !important;
+    }
+
+    /* drag bar */
+    .gh-heatmap .dragbar {
+      height: 30px;
+      cursor: ns-resize;       /* unified cursor */
+      background: rgba(255,255,255,.25);
+      border-radius: 30px;
+      user-select: none;
+    }
+
+    .gh-heatmap:not(.expanded) #ghhm-graph{
+      overflow-y: hidden;
+    }
+    .gh-heatmap .title{font-weight:1000;letter-spacing:.2px;opacity:.98}
+    .gh-heatmap .hint{font-size:11px;color:rgba(255,255,255,.65);font-weight:800}
+    .gh-heatmap svg{
+      display:block;
+      width:auto;               /* don't force 100% */
+      height:auto;              /* don't force 100% */
+      max-width:100%;           /* still allow shrink if panel is narrow */
+    }
+    .gh-heatmap rect.day{
+      rx:3; ry:3;
+      shape-rendering:crispEdges;
+      transition:transform .12s ease, stroke .12s ease, filter .12s ease;
+    }
+    .gh-heatmap rect.day:hover{
+      transform:translateY(-1px) scale(1.06);
+      stroke:rgba(255,255,255,.45);
+      filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));
+    }
+    /* tiny month “pills” on the right edge */
+    .gh-heatmap .month text{font-size:9px;font-weight:800;fill:rgba(255,255,255,.85)}
+    .gh-heatmap .month rect{fill:rgba(255,255,255,.08);stroke:rgba(255,255,255,.12);rx:6;ry:6}
+
+    /* tooltip */
+    #ghhm-tip{
+      position:fixed; z-index:1000000; pointer-events:none;
+      max-width:38ch; padding:8px 10px; border-radius:10px;
+      background:rgba(0,0,0,.85);
+      border:1px solid rgba(255,255,255,.12);
+      color:#e8ecf1; font-weight:800; font-size:12px; line-height:1.35;
+      backdrop-filter: blur(10px) saturate(140%);
+      -webkit-backdrop-filter: blur(10px) saturate(140%);
+      box-shadow:0 10px 28px rgba(0,0,0,.6);
+      transform:translate(-50%,-120%); opacity:0; transition:opacity .12s;
+    }
+    #ghhm-tip.show{opacity:1}
+    #ghhm-tip .sub{display:block;color:rgba(255,255,255,.7);font-weight:700;margin-top:4px}
+    #ghhm-graph{
+      overflow-y:auto;          /* <-- was missing */
+      overflow-x:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 0;
+    }
+
+    #ghhm-graph > svg{
+      display:block;
+      margin:auto;                  /* center inside flex */
+    }
+    /* upcoming days (future) look muted and don't hover-pop */
+    .gh-heatmap rect.day.future{
+      fill: rgba(255,255,255,.06);  /* soft grey */
+      opacity:.7;
+      pointer-events:none;          /* no tooltip/hover bump */
+    }
+    .gh-heatmap rect.day.future:hover{
+      transform:none; stroke:none; filter:none;
+    }
+    @keyframes dotIdle{0%,100%{transform:translate(-50%,-50%) translate(calc(var(--dx,0px)*-1),calc(var(--dy,0px)*-1))}50%{transform:translate(-50%,-50%) translate(var(--dx,0px),var(--dy,0px))}}
+  </style>
+</head>
+<body class="bg">
+  <section class="identity" aria-label="Über mich">
+    <div class="name-row">
+      <h1 class="name">Marco Makawejew</h1>
+      <div class="skill-icons" aria-label="Stack">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript" title="JavaScript" loading="lazy" decoding="async" onerror="this.src='assets/skills/js.svg'">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" alt="HTML5" title="HTML5" loading="lazy" decoding="async" onerror="this.src='assets/skills/html5.svg'">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg" alt="CSS3" title="CSS3" loading="lazy" decoding="async" onerror="this.src='assets/skills/css3.svg'">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/php/php-original.svg" alt="PHP" title="PHP" loading="lazy" decoding="async" onerror="this.src='assets/skills/php.svg'">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" alt="React" title="React" loading="lazy" decoding="async" onerror="this.src='assets/skills/react.svg'">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" alt="MySQL" title="MySQL" loading="lazy" decoding="async" onerror="this.src='assets/skills/mysql.svg'">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" alt="Tailwind CSS" title="Tailwind CSS" loading="lazy" decoding="async" onerror="this.src='assets/skills/tailwind.svg'">
+        <img src="https://cdn.simpleicons.org/truenas/ffffff" alt="TrueNAS" title="TrueNAS" loading="lazy" decoding="async" onerror="this.src='assets/skills/truenas.svg'">
+      </div>
+    </div>
+    <div class="role">Developer • Systems • Design</div>
+    <h2 class="tagline">
+      I build <span class="accent">fast UIs</span> & <span class="accent">robust backends</span>.
+    </h2>
+    <p class="subline">Clean UX. Realtime. Pragmatic.</p>
+  </section>
+
+  <main class="stage">
+    <section class="left">
+      <div class="orbit" aria-label="Projekte" id="orbit">
+        <div class="core" aria-hidden="true"></div>
+        <div class="profile" id="profile"><div class="pf-dots" id="pfDots"></div></div>
+        <div class="ring" id="ring"></div>
+      </div>
+
+      <div class="dock" id="dock" aria-label="Projekte wählen"></div>
+    </section>
+
+    <section class="right"><div id="expanded"></div></section>
+  </main>
+
+  <div class="hover-preview" id="hoverPreview">
+    <div class="hp-media" id="hpMedia"><div class="hp-label" id="hpLabel"></div></div>
+    <div class="hp-desc" id="hpDesc"></div>
+  </div>
+  <div id="ghHeatmap" class="gh-heatmap" role="img" aria-label="GitHub contribution heatmap"></div>
+  <script>
+  window.PRESENCE_ORIGIN = "https://presence.makawejew.com";
+
+  (function () {
+    const $  = (q, el = document) => el.querySelector(q);
+    const $$ = (q, el = document) => [...el.querySelectorAll(q)];
+
+    const orbit  = $('#orbit');
+    const ring   = $('#ring');
+    const dock   = $('#dock');
+    const hoverPreview = $('#hoverPreview');
+    const hpMedia = $('#hpMedia');
+    const hpLabel = $('#hpLabel');
+    const hpDesc  = $('#hpDesc');
+    const expanded = $('#expanded');
+
+    const projects = [
+      {title:'Markets Board',desc:'Realtime Dashboard …',img:'assets/marketboard.jpg',live:'https://makawejew.live',code:'https://git.makawejew.com'},
+      {title:'Marco Hub',desc:'iOS-ähnliches Kachel-Dashboard …',img:'assets/hub.jpg'},
+      {title:'Autohaus',desc:'PHP/MySQL App …',img:'assets/autohaus.jpg'},
+      {title:'Markets Mobile',desc:'Responsive Watchlist + Sparklines.',img:'assets/mobile.jpg'},
+      {title:'Events Platform',desc:'One-screen Event-Creation MVP (HTML/CSS/JS/PHP).',img:'assets/events.jpg'},
+      {title:'Discord Suggestion Bot',desc:'Modal-Flows, Forum-Threads, DOCX-Export, Auto-Sync.',img:'assets/discord.jpg'},
+      {title:'AI Voice Lab',desc:'Lokales TTS/VC Setup (RTX 2080 Super).',img:'assets/voice.jpg'},
+      {title:'TrueNAS Stack',desc:'Self-hosted Suite: Nextcloud, Gitea, WireGuard, MineOS …',img:'assets/truenas.jpg'},
+      {title:'Markets API Proxy',desc:'Rate-limited Aggregator für Quotes & Candles.',img:'assets/api.jpg'},
+      {title:'Portfolio Orbit',desc:'Diese abstrakte Orbit-UI, ohne Boxen.',img:'assets/orbit.jpg'},
+      {title:'Unity FPS Controller',desc:'Sprinting, Sliding, Ledge Climb, Air Control.',img:'assets/unity.jpg'},
+      {title:'Cloudflare Pages',desc:'Multi-Subdomain Setup mit Tunnels & DNS.',img:'assets/cloudflare.jpg'},
+      {title:'Markets Board v2',desc:'WebSocket Toggles, EUR/USD Switch, Recharts.',img:'assets/marketboard2.jpg'},
+      {title:'Autohaus v2',desc:'Neue Filtergruppen, Sticky Header, Price/Perf.',img:'assets/autohaus2.jpg'},
+      {title:'Hub Folders',desc:'Drag-Hold Ordnerbildung, Quick-Access Pins.',img:'assets/folders.jpg'},
+      {title:'Investment News AI',desc:'News-Aggregator mit Topic-Clustering.',img:'assets/news.jpg'},
+      {title:'Markets Mobile',desc:'Responsive Watchlist + Sparklines.',img:'assets/mobile.jpg'},
+      {title:'Gitea Pipelines',desc:'CI für Code-Server Repos.',img:'assets/gitea.jpg'},
+      {title:'DOCX Engine',desc:'Word-Generator mit Bild-Previews, Listen.',img:'assets/docx.jpg'},
+      {title:'Forum Sync',desc:'Threads rehydrate + Status-Emoji Update.',img:'assets/forum.jpg'},
+      {title:'Orbit Shader',desc:'Noise-Glow Experiments.',img:'assets/shader.jpg'}
+    ];
+
+    const palettes = [
+      ['#7C5CFF','#00E0B8'],
+      ['#FF8A5B','#FF4D97'],
+      ['#4DA1FF','#6FFFE9'],
+      ['#FFD166','#06D6A0'],
+      ['#F72585','#7209B7'],
+      ['#71EFA3','#29ABE2'],
+      ['#F97316','#F43F5E']
+    ];
+
+    let current = 0;
+    const thetaList = [];
+    let angleAcc = 0;
+    let activeFlyer = null;
+    let activeBigEl = null;
+    let hiddenBlob = null;
+    let placements = [];
+    let dockOrder = [];
+
+    /* ---------- fixed hole logic (3-o'clock) ---------- */
+    const HOLE_AT_DEG = 0;
+    let holeIdx = -1;
+
+    const norm = (a) => (a % 360 + 360) % 360;
+    const angDist = (a, b) => {
+      let d = norm(a) - norm(b);
+      if (d > 180) d -= 360;
+      if (d < -180) d += 360;
+      return Math.abs(d);
+    };
+    const worldAngleOf = (i) => norm((placements[i]?.theta || 0) + angleAcc);
+
+    function findHoleIndex() {
+      let bestI = 0, bestD = 999;
+      placements.forEach((_, i) => {
+        const d = angDist(worldAngleOf(i), HOLE_AT_DEG);
+        if (d < bestD) { bestD = d; bestI = i; }
+      });
+      return bestI;
+    }
+
+    function applyHole(newIdx) {
+      if (holeIdx === newIdx) return;
+
+      if (holeIdx >= 0) {
+        const oldNode = $$('#ring .node')[holeIdx];
+        oldNode?.classList.remove('holed');
+        oldNode?.querySelector('.hole')?.remove();
+        oldNode?.querySelector('.blob')?.style.removeProperty('visibility');
+      }
+
+      holeIdx = newIdx;
+      const node = $$('#ring .node')[holeIdx];
+      const petal = node?.querySelector('.petal');
+      const blob  = node?.querySelector('.blob');
+      if (!node || !petal || !blob) return;
+
+      if (!node.querySelector('.hole')) {
+        const hole = document.createElement('div');
+        hole.className = 'hole';
+        petal.appendChild(hole);
+      }
+      node.classList.add('holed');
+      blob.style.visibility = 'hidden';
+      hiddenBlob = blob;
+    }
+    /* --------------------------------------------------- */
+
+    function positionPreviewFromMouse(e) {
+      const pad = 12, off = 22;
+      const vw = innerWidth, vh = innerHeight;
+      if (!hoverPreview.classList.contains('show')) hoverPreview.classList.add('show');
+      const w = hoverPreview.offsetWidth || 320;
+      const h = hoverPreview.offsetHeight || 200;
+      const inDock = !!e.target && e.target.closest('.dock');
+      let x = e.clientX + off;
+      let y = e.clientY + off;
+      const nearBottom = e.clientY > (vh - h - 60);
+      if (inDock || nearBottom) y = e.clientY - h - off;
+      x = Math.min(vw - w - pad, Math.max(pad, x));
+      y = Math.min(vh - h - pad, Math.max(pad, y));
+      hoverPreview.style.left = x + 'px';
+      hoverPreview.style.top  = y + 'px';
+    }
+
+    function showPreview(i, p) {
+      hpLabel.textContent = p.title;
+      hpDesc.textContent  = p.desc || '';
+      hpMedia.style.setProperty('--hp', `url('${p.img}')`);
+      hoverPreview.classList.add('show');
+    }
+
+    function hidePreview() {
+      hoverPreview.classList.remove('show');
+    }
+
+    function computeLayout(N) {
+      const rect = orbit.getBoundingClientRect();
+      const Rmax = Math.min(rect.width, rect.height) * 0.46;
+      const caps = [8,16,24,32,40];
+      const rings = [];
+      let rest = N, ri = 0;
+
+      while (rest > 0) {
+        const cap = caps[ri] || (8 * (ri + 1));
+        const cnt = Math.min(cap, rest);
+        rings.push({ ri, cnt, cap });
+        rest -= cnt;
+        ri++;
+      }
+
+      const fracs = [0.58,0.80,0.92,0.97,0.985];
+      const out = [];
+
+      rings.forEach((rg, j) => {
+        const k = rg.cnt;
+        const step = 360 / k;
+        const r = (fracs[j] || fracs[fracs.length - 1]) * Rmax;
+        const offset = j > 0 ? (360 / (rings[j - 1].cnt)) / 2 : 0;
+        for (let n = 0; n < k; n++) {
+          out.push({ theta: n * step + offset, r, s: scaleForN(N) * (1 - j * 0.05), ring: j, within: n });
+        }
+      });
+
+      return out.slice(0, N);
+    }
+
+    function scaleForN(N) {
+      return N <= 8 ? 1 : N <= 12 ? 0.95 : N <= 20 ? 0.85 : N <= 28 ? 0.78 : 0.72;
+    }
+
+    function renderExpanded(p, hidden = false) {
+      const [c1, c2] = palettes[current % palettes.length];
+      const grad = (100 + current * 37) % 360 + 'deg';
+
+      const big = document.createElement('div');
+      big.className = 'blob mega' + (hidden ? ' hidden' : '');
+      big.style.setProperty('--img', `url('${p.img}')`);
+      big.style.setProperty('--c1', c1);
+      big.style.setProperty('--c2', c2);
+      big.style.setProperty('--grad', grad);
+
+      const inner = document.createElement('div');
+      inner.className = 'mega-inner';
+      big.appendChild(inner);
+
+      expanded.innerHTML = '';
+      expanded.appendChild(big);
+      return big;
+    }
+
+    function flyPetalToExpanded(index, bigEl) {
+      if (activeFlyer) {
+        activeFlyer.remove();
+        if (activeBigEl) activeBigEl.classList.remove('hidden');
+        activeFlyer = null;
+        activeBigEl = null;
+      }
+
+      const srcBlob = document.querySelectorAll('#ring .node .blob')[holeIdx];
+      if (!srcBlob || !bigEl) return;
+
+      applyHole(holeIdx);
+
+      const srcRect = srcBlob.getBoundingClientRect();
+      const dstRect = bigEl.getBoundingClientRect();
+      const flyer = srcBlob.cloneNode(false);
+      flyer.classList.add('fly');
+      document.body.appendChild(flyer);
+
+      flyer.style.width  = dstRect.width  + 'px';
+      flyer.style.height = dstRect.height + 'px';
+      flyer.style.left   = dstRect.left   + 'px';
+      flyer.style.top    = dstRect.top    + 'px';
+
+      const dx = (srcRect.left + srcRect.width  / 2) - (dstRect.left + dstRect.width  / 2);
+      const dy = (srcRect.top  + srcRect.height / 2) - (dstRect.top  + dstRect.height / 2);
+      const sx = srcRect.width  / dstRect.width;
+      const sy = srcRect.height / dstRect.height;
+
+      bigEl.classList.add('hidden');
+
+      flyer.style.transform = `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
+      flyer.getBoundingClientRect();
+      flyer.classList.add('anim');
+      flyer.style.transform = 'translate(0,0) scale(1,1)';
+
+      activeFlyer = flyer;
+      activeBigEl = bigEl;
+
+      const finish = () => {
+        if (!activeFlyer || flyer !== activeFlyer) return;
+        bigEl.classList.remove('hidden');
+        flyer.remove();
+        activeFlyer = null;
+        activeBigEl = null;
+      };
+
+      flyer.addEventListener('transitionend', finish, { once: true });
+      setTimeout(finish, 900);
+    }
+
+    function update(initial = false) {
+      const target = -(thetaList[current] || 0);
+
+      if (initial) {
+        angleAcc = target;
+      } else {
+        let d = (target - angleAcc) % 360;
+        if (d > 180) d -= 360;
+        if (d < -180) d += 360;
+        angleAcc += d;
+      }
+
+      ring.style.setProperty('--angle', angleAcc + 'deg');
+      $$('#ring .node').forEach((n, i) => n.classList.toggle('active', i === current));
+      $$('#dock .dock-item').forEach((d) => d.classList.toggle('active', +d.dataset.index === current));
+
+      const p = projects[current];
+      const big = renderExpanded(p, !initial);
+
+      const [c1, c2] = palettes[current % palettes.length];
+      const c3 = palettes[(current + 1) % palettes.length][0];
+      document.documentElement.style.setProperty('--sel-c1', c1);
+      document.documentElement.style.setProperty('--sel-c2', c2);
+      document.documentElement.style.setProperty('--sel-c3', c3);
+
+      applyHole(findHoleIndex());
+
+      if (!initial) flyPetalToExpanded(current, big);
+    }
+
+    const GH = { owner: "ShyBits", perRepo: 3, totalLimit: 10 };
+
+    async function fetchPushMessagesByDate(login){
+      const map = new Map();
+
+      const push = (dateStr, msg) => {
+        if (!dateStr || !msg) return;
+        const d = dateStr.slice(0,10);
+        (map.get(d) || map.set(d, []).get(d)).push(msg.trim());
+      };
+
+      try {
+        for (const page of [1,2]) {
+          // 🚀 jetzt via Proxy statt direkt GitHub
+          const res = await fetch(`http://localhost:3000/events/${encodeURIComponent(login)}?page=${page}&per_page=100`);
+          if (!res.ok) break;
+          const events = await res.json();
+
+          for (const ev of events) {
+            if (ev?.type !== "PushEvent") continue;
+            const when = ev.created_at || "";
+            for (const c of (ev.payload?.commits || [])) {
+              push(when, (c?.message || "").split("\n")[0]);
+            }
+          }
+          if (!Array.isArray(events) || events.length < 100) break;
+        }
+      } catch(e){}
+
+      return map;
+    }
+
+    function timeAgo(d) {
+      const s = Math.floor((Date.now() - d.getTime()) / 1000);
+      const t = (n, u) => `${n}${u}`;
+      if (s < 60) return t(s, "s");
+      const m = Math.floor(s / 60); if (m < 60) return t(m, "m");
+      const h = Math.floor(m / 60); if (h < 24) return t(h, "h");
+      const dd = Math.floor(h / 24); if (dd < 30) return t(dd, "d");
+      const mo = Math.floor(dd / 30); if (mo < 12) return t(mo, "mo");
+      const y = Math.floor(mo / 12); return t(y, "y");
+    }
+    // compact GitHub-like green scale for our black "glass" theme
+    function greenFor(count){
+      if (!count) return 'rgba(255,255,255,.10)'; // 0 = sehr helles Grau
+      if (count <= 1) return '#9be9a8';
+      if (count <= 3) return '#40c463';
+      if (count <= 6) return '#30a14e';
+      return '#216e39';
+    }
+
+    // fetch recent PushEvent commit messages and group by YYYY-MM-DD
+    async function fetchPushMessagesByDate(login, token){
+      const map = new Map();
+
+      // helper to push text into our map
+      const push = (dateStr, msg) => {
+        if (!dateStr || !msg) return;
+        const d = dateStr.slice(0,10); // YYYY-MM-DD
+        const arr = map.get(d) || [];
+        arr.push(msg.trim());
+        map.set(d, arr);
+      };
+
+      try{
+        // we take up to ~ 2 pages of user events (recent history)
+        const pages = [1,2];
+        for (const page of pages){
+          const res = await fetch(`https://api.github.com/users/${encodeURIComponent(login)}/events?page=${page}&per_page=100`, {
+            headers: token ? { 'Authorization':'Bearer ' + token } : {}
+          });
+          if (!res.ok) break; // stop quietly on rate limit / 404
+          const events = await res.json();
+
+          for (const ev of events){
+            if (ev?.type !== 'PushEvent') continue;
+            const when = ev.created_at || '';
+            const commits = ev.payload?.commits || [];
+            for (const c of commits){
+              // message only (shorten multiline)
+              const msg = (c?.message || '').split('\n')[0];
+              push(when, msg);
+            }
+          }
+
+          // if the page returned less than 100 events, we reached the end
+          if (!Array.isArray(events) || events.length < 100) break;
+        }
+      }catch(e){
+        // silent fallback – just no messages in tooltip
+      }
+
+      return map;
+    }
+    
+    async function renderGitHubHeatmap(){
+      const mount = document.getElementById('ghHeatmap');
+      if (!mount) return;
+
+      mount.innerHTML = `
+        <div class="dragbar" id="ghhm-drag"></div>
+        <div class="title" id="ghhm-title">GitHub activity</div>
+        <div id="ghhm-graph" style="position:relative"></div>
+        <div id="ghhm-legend" class="hint" aria-hidden="true"></div>
+      `;
+
+      const graph = document.getElementById('ghhm-graph');
+
+      // Tooltip node einmalig anlegen
+      let tip = document.getElementById('ghhm-tip');
+      if (!tip){
+        tip = document.createElement('div');
+        tip.id = 'ghhm-tip';
+        document.body.appendChild(tip);
+      }
+
+      // ✨ Token-Guard raus!
+      // if (!GH.token){ ... } entfernen
+
+      const query = `
+        query($login:String!){
+          user(login:$login){
+            contributionsCollection {
+              contributionCalendar {
+                totalContributions
+                weeks {
+                  contributionDays {
+                    date
+                    contributionCount
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      try {
+        // ✨ Proxy statt direkter GitHub-Call
+        const res = await fetch("http://localhost:3000/github",
+        {
+          method: "POST",
+          headers: { "Content-Type":"application/json" },
+          body: JSON.stringify({ query, variables: { login: GH.owner } })
+        });
+        if (!res.ok) throw new Error(`GraphQL ${res.status}`);
+        const data = await res.json();
+
+        const cal   = data?.data?.user?.contributionsCollection?.contributionCalendar;
+        const weeks = cal?.weeks || [];
+        const total = cal?.totalContributions ?? 0;
+
+        const weeksOrdered = [...weeks].reverse();
+
+        // Commits für Tooltips holen – auch über Proxy
+        const byDateMsgs = await fetchPushMessagesByDate(GH.owner);
+
+        // Titel inkl. Summe
+        const titleEl = document.getElementById('ghhm-title');
+        titleEl.innerHTML = `GitHub activity <span class="hint">last 12 months · ${total} total</span>`;
+
+        // Layout (taller than wide)
+        // Layout (taller than wide)
+        const COLS = 7;
+        const ROWS = weeksOrdered.length;
+        const CELL = 18;
+        const GAP  = 5;
+        const RGUT = 56;
+        const W = COLS * CELL + (COLS - 1) * GAP + RGUT;
+        const H = ROWS * CELL + (ROWS - 1) * GAP;
+        const START_MONDAY = true;
+        const todayStr = new Date().toISOString().slice(0,10);
+
+        const parts = [];
+        parts.push(`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">`);
+
+        // heatmap cells (newest week on top)
+        for (let r = 0; r < ROWS; r++) {
+          const week = weeksOrdered[r]?.contributionDays || [];
+
+          const dayAt = (c) => {
+            if (!START_MONDAY) return week[c];        // Sun..Sat
+            const idx = (c + 1) % 7;                  // Mon..Sun
+            return week[idx];
+          };
+
+          for (let c = 0; c < COLS; c++) {
+            const d = dayAt(c) || {};
+            const x = c * (CELL + GAP);
+            const y = r * (CELL + GAP);
+            const dateStr = d.date || '';
+            const isFuture = dateStr && dateStr > todayStr;
+            const count = isFuture ? 0 : (d.contributionCount | 0);
+            const fill  = isFuture ? 'rgba(255,255,255,.06)' : greenFor(count);
+
+            const msgs = !isFuture && dateStr ? byDateMsgs.get(dateStr) : null;
+            const tipHeader = dateStr ? `${dateStr} • ${count} contributions` : `No data`;
+            const tipMsg = msgs?.length ? `\n- ${msgs.slice(0,3).join('\n- ')}` : '';
+            const tipText = tipHeader + tipMsg;
+
+            parts.push(
+              `<rect class="day${isFuture ? ' future' : ''}"
+                    x="${x}" y="${y}" width="${CELL}" height="${CELL}" fill="${fill}"
+                    data-date="${dateStr}" data-tip="${tipText.replace(/"/g,'&quot;')}"
+                    rx="3" ry="3"></rect>`
+            );
+          }
+        }
+        // pad out future days until end of the month
+        let lastRendered = null;
+        for (let r = ROWS-1; r >= 0 && !lastRendered; r--) {
+          const week = weeksOrdered[r]?.contributionDays || [];
+          for (let c = COLS-1; c >= 0; c--) {
+            if (week[c]?.date) {
+              lastRendered = new Date(week[c].date);
+              break;
+            }
+          }
+        }
+
+        if (lastRendered) {
+          const today = new Date();
+          let cursor = new Date(lastRendered);
+          cursor.setDate(cursor.getDate() + 1);
+
+          while (cursor.getMonth() === lastRendered.getMonth()) {
+            const x = (cursor.getDay() + 6) % 7 * (CELL + GAP); // Mon=0…Sun=6
+            const anchor = new Date(weeksOrdered[0].contributionDays[0].date);
+
+            const weeksSinceStart = Math.floor(
+              (anchor - cursor) / (1000 * 60 * 60 * 24 * 7)
+            );
+            const y = weeksSinceStart * (CELL + GAP);
+
+            parts.push(
+              `<rect class="day future"
+                    x="${x}" y="${y}" width="${CELL}" height="${CELL}"
+                    fill="rgba(255,255,255,.08)"
+                    data-date="${cursor.toISOString().slice(0,10)}"
+                    data-tip="Upcoming date"
+                    rx="3" ry="3"></rect>`
+            );
+
+            cursor.setDate(cursor.getDate() + 1);
+          }
+        }
+        // vertical month labels on the right
+        let lastM = '';
+        for (let r = 0; r < ROWS; r++) {
+          const first = weeksOrdered[r]?.contributionDays?.[0];
+          if (!first?.date) continue;
+          const mStr = monthLong(new Date(first.date));
+          if (mStr === lastM) continue;
+          lastM = mStr;
+
+          const letters = mStr.toUpperCase().split('');
+          const baseY = r * (CELL + GAP);
+          const baseX = COLS * (CELL + GAP) + 10;
+
+          parts.push('<g class="month">');
+          letters.forEach((ch, i) => {
+            const ly = baseY + i * (CELL * 0.9);
+            parts.push(
+              `<text x="${baseX}" y="${ly + CELL*0.75}" font-size="10" font-weight="800"
+                    fill="rgba(255,255,255,.9)">${ch}</text>`
+            );
+          });
+          parts.push('</g>');
+        }
+
+        parts.push(`</svg>`);
+        graph.innerHTML = parts.join('');
+        graph.scrollTop = 0;
+        
+
+        // Legende (bleibt)
+        document.getElementById('ghhm-legend').innerHTML = `
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span>Less</span>
+            <span style="display:inline-grid;grid-auto-flow:column;gap:4px;align-items:center;">
+              <span style="width:10px;height:10px;border-radius:3px;background:${greenFor(0)};display:inline-block"></span>
+              <span style="width:10px;height:10px;border-radius:3px;background:${greenFor(1)};display:inline-block"></span>
+              <span style="width:10px;height:10px;border-radius:3px;background:${greenFor(2)};display:inline-block"></span>
+              <span style="width:10px;height:10px;border-radius:3px;background:${greenFor(3)};display:inline-block"></span>
+              <span style="width:10px;height:10px;border-radius:3px;background:${greenFor(4)};display:inline-block"></span>
+            </span>
+            <span>More</span>
+          </div>
+        `;
+
+        // Tooltip (delegiert)
+        const onMove = (e)=>{
+          if (!tip.classList.contains('show')) return;
+          const pad = 12;
+          const x = Math.min(window.innerWidth - pad, Math.max(pad, e.clientX));
+          const y = Math.min(window.innerHeight - pad, Math.max(pad, e.clientY));
+          tip.style.left = x + 'px';
+          tip.style.top  = y + 'px';
+        };
+        graph.addEventListener('mousemove', onMove);
+
+        graph.addEventListener('mouseover', (e)=>{
+          const rect = e.target.closest('rect.day');
+          if (!rect) return;
+          tip.innerHTML = rect.getAttribute('data-tip')
+            .replace(/\n/g,'<br>')
+            .replace(/ - /g,' &ndash; ');
+          tip.classList.add('show');
+          onMove(e);
+        });
+        graph.addEventListener('mouseout', ()=>{
+          tip.classList.remove('show');
+        });
+
+      }catch(err){
+        document.getElementById('ghhm-graph').innerHTML =
+          `<div class="hint">Couldn't load heatmap (${String(err?.message || err)}).</div>`;
+      }
+    }
+    function go(i) {
+      $$('#ring .node.hovering').forEach((n) => n.classList.remove('hovering'));
+      ring.classList.remove('is-hovering');
+      hidePreview();
+      current = (i + projects.length) % projects.length;
+      update();
+    }
+
+    const next = () => go(current + 1);
+    const prev = () => go(current - 1);
+
+    function renderProfileDots(count) {
+      const wrap = document.getElementById('pfDots');
+      if (!wrap) return;
+
+      const total = Math.max(0, Number(count) || 0);
+      const needSelf = total > 0 ? 1 : 0;
+
+      const existing = [...wrap.querySelectorAll('.dot')];
+      existing.forEach((d, i) => {
+        d.classList.add('leave');
+        setTimeout(() => d.remove(), 220 + i * 10);
+      });
+
+      function placeDotAtIndex(el, idx, totalDots) {
+        const profile = document.getElementById('profile');
+        const rect = profile.getBoundingClientRect();
+        const R = rect.width / 2;
+        const pad = 6;
+        const minR = 0.28 * R;
+        const maxR = R - pad;
+
+        const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+        const k = idx;
+        const t = (k + 0.5) / Math.max(1, totalDots);
+        const r = minR + (maxR - minR) * Math.sqrt(t);
+        const theta = k * GOLDEN_ANGLE;
+
+        const cx = R + Math.cos(theta) * r;
+        const cy = R + Math.sin(theta) * r;
+
+        el.style.left = (cx / rect.width * 100) + '%';
+        el.style.top  = (cy / rect.height * 100) + '%';
+
+        const ps = (n) => {
+          const s = Math.sin(n * 12.9898) * 43758.5453;
+          return s - Math.floor(s);
+        };
+
+        const dx = (ps(k) * 10) - 5;
+        const dy = (ps(k + 42) * 10) - 5;
+        el.style.setProperty('--dx', dx.toFixed(1) + 'px');
+        el.style.setProperty('--dy', dy.toFixed(1) + 'px');
+
+        const dur = 7 + ((k * 1.618) % 5);
+        el.style.setProperty('--dur', dur.toFixed(2) + 's');
+        el.style.setProperty('--delay', (-(k % dur)).toFixed(2) + 's');
+        el.style.setProperty('--twinkle-delay', (200 + ((k * 97) % 1000)) + 'ms');
+      }
+
+      function makeDot(kind, idx) {
+        const dot = document.createElement('span');
+        dot.className = `dot ${kind}`;
+        placeDotAtIndex(dot, idx, total);
+        wrap.appendChild(dot);
+        requestAnimationFrame(() => dot.classList.add('enter'));
+      }
+
+      if (needSelf) makeDot('self', 0);
+      for (let i = 1; i < total; i++) makeDot('other', i);
+    }
+
+    function updateRingHoverState() {
+      if (ring.querySelector('.node.hovering')) ring.classList.add('is-hovering');
+      else ring.classList.remove('is-hovering');
+    }
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+    const tiltTarget = orbit;
+    const TILT_MAX = 12;
+    let rafId = null;
+    const tilt = { rx:0, ry:0, tx:0, ty:0 };
+
+    function tiltTick() {
+      const lerp = 0.10;
+      tilt.ry += (tilt.tx - tilt.ry) * lerp;
+      tilt.rx += (tilt.ty - tilt.rx) * lerp;
+      tiltTarget.style.setProperty('--tiltX', tilt.rx.toFixed(2) + 'deg');
+      tiltTarget.style.setProperty('--tiltY', tilt.ry.toFixed(2) + 'deg');
+      if (Math.abs(tilt.tx - tilt.ry) > 0.02 || Math.abs(tilt.ty - tilt.rx) > 0.02) {
+        rafId = requestAnimationFrame(tiltTick);
+      } else {
+        rafId = null;
+      }
+    }
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+    function onPointerMove(e) {
+      const rect = tiltTarget.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top)  / rect.height;
+      tilt.tx = clamp((x - 0.5) * (TILT_MAX * 2), -TILT_MAX, TILT_MAX);
+      tilt.ty = clamp((0.5 - y) * (TILT_MAX * 2), -TILT_MAX, TILT_MAX);
+      if (!rafId) rafId = requestAnimationFrame(tiltTick);
+    }
+
+    function onPointerLeave() {
+      tilt.tx = 0; tilt.ty = 0;
+      if (!rafId) rafId = requestAnimationFrame(tiltTick);
+    }
+
+    if (!prefersReduced && !isCoarse) {
+      orbit.addEventListener('mousemove', onPointerMove);
+      orbit.addEventListener('mouseleave', onPointerLeave);
+    }
+
+    (function presenceTrail() {
+      const profile = document.getElementById('profile');
+      const wrap    = document.getElementById('pfDots');
+      if (!profile || !wrap) return;
+
+      let pending = false;
+      let lastEvt = null;
+
+      function applyTrail(e) {
+        const cx = e.clientX;
+        const cy = e.clientY;
+        const rect = profile.getBoundingClientRect();
+        const influence = rect.width * 0.5;
+        const strength  = 14;
+
+        wrap.querySelectorAll('.dot').forEach((dot) => {
+          const dr = dot.getBoundingClientRect();
+          const dx = (dr.left + dr.width / 2) - cx;
+          const dy = (dr.top  + dr.height / 2) - cy;
+          const dist = Math.hypot(dx, dy) || 0.0001;
+
+          if (dist < influence) {
+            const ratio = 1 - dist / influence;
+            const pushX = (dx / dist) * strength * ratio;
+            const pushY = (dy / dist) * strength * ratio;
+            dot.style.setProperty('--trailX', pushX.toFixed(1) + 'px');
+            dot.style.setProperty('--trailY', pushY.toFixed(1) + 'px');
+            dot.classList.add('trail');
+            setTimeout(() => dot.classList.remove('trail'), 220);
+          } else {
+            dot.style.setProperty('--trailX', '0px');
+            dot.style.setProperty('--trailY', '0px');
+          }
+        });
+      }
+
+      profile.addEventListener('mousemove', (e) => {
+        lastEvt = e;
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(() => {
+          pending = false;
+          if (lastEvt) applyTrail(lastEvt);
+        });
+      });
+
+      profile.addEventListener('mouseleave', () => {
+        wrap.querySelectorAll('.dot').forEach((dot) => {
+          dot.style.setProperty('--trailX', '0px');
+          dot.style.setProperty('--trailY', '0px');
+        });
+      });
+    })();
+
+    function mount() {
+      const N = projects.length;
+      placements = computeLayout(N);
+      ring.innerHTML = '';
+      dock.innerHTML = '';
+      thetaList.length = 0;
+      angleAcc = 0;
+      hiddenBlob = null;
+      holeIdx = -1;
+
+      projects.forEach((p, i) => {
+        const [c1, c2] = palettes[i % palettes.length];
+        const grad = (100 + i * 37) % 360 + 'deg';
+        const node = document.createElement('button');
+        node.className = 'node';
+        node.style.setProperty('--theta', placements[i].theta + 'deg');
+        node.style.setProperty('--r', placements[i].r + 'px');
+        node.style.setProperty('--s', placements[i].s);
+        node.setAttribute('aria-label', p.title);
+        node.style.zIndex = String(1000 - placements[i].ring);
+        node.innerHTML = `<div class="petal"><div class="blob" style="--img:url('${p.img}');--grad:${grad};--c1:${c1};--c2:${c2}"></div></div>`;
+        const blob = node.querySelector('.blob');
+        const dur = 7 + Math.random() * 4;
+        blob.style.setProperty('--idle-dur', dur + 's');
+        blob.style.setProperty('--idle-delay', (-Math.random() * dur).toFixed(2) + 's');
+        blob.style.setProperty('--float', (4 + Math.random() * 6) + 'px');
+        blob.style.setProperty('--sway',  (1 + Math.random() * 3) + 'deg');
+        node.addEventListener('click', () => go(i));
+        node.addEventListener('mouseenter', (e) => {
+          node.classList.add('hovering');
+          updateRingHoverState();
+          showPreview(i, projects[i]);
+          positionPreviewFromMouse(e);
+        });
+        node.addEventListener('mousemove', (e) => positionPreviewFromMouse(e));
+        node.addEventListener('mouseleave', () => {
+          node.classList.remove('hovering');
+          updateRingHoverState();
+          hidePreview();
+        });
+        ring.appendChild(node);
+        thetaList[i] = placements[i].theta;
+      });
+
+      dockOrder = placements
+        .map((pl, i) => ({ i, ring: pl.ring, within: pl.within }))
+        .sort((a, b) => a.ring - b.ring || a.within - b.within)
+        .map((o) => o.i);
+
+      dockOrder.forEach((projIndex) => {
+        const p = projects[projIndex];
+        const d = document.createElement('button');
+        d.className = 'dock-item';
+        d.dataset.index = String(projIndex);
+        d.style.setProperty('--img', `url('${p.img}')`);
+        d.title = p.title;
+        d.addEventListener('click', () => go(projIndex));
+        d.addEventListener('mouseenter', (e) => { showPreview(projIndex, p); positionPreviewFromMouse(e); });
+        d.addEventListener('mousemove',  (e) => positionPreviewFromMouse(e));
+        d.addEventListener('mouseleave', hidePreview);
+        dock.appendChild(d);
+      });
+
+      update(true);
+      window.addEventListener('resize', remountThrottled, { passive: true });
+    }
+
+    let remountTimer = null;
+    function remountThrottled() {
+      if (remountTimer) return;
+      remountTimer = setTimeout(() => { remountTimer = null; mount(); }, 120);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') next();
+      else if (e.key === 'ArrowLeft') prev();
+      else if (/^[0-9]$/.test(e.key)) {
+        const map = { '0':9,'1':0,'2':1,'3':2,'4':3,'5':4,'6':5,'7':6,'8':7,'9':8 };
+        const idx = map[e.key];
+        if (idx < projects.length) go(idx);
+      } else if (e.key === 'Enter') {
+        const p = projects[current];
+        if (p.live) window.open(p.live, '_blank');
+      }
+    });
+
+    ring.addEventListener('touchend', (e) => {
+      const n = e.target.closest('.node');
+      if (!n) return;
+      const idx = [...$('#ring').children].indexOf(n);
+      if (idx >= 0) go(idx);
+    }, { passive: true });
+
+    mount();
+    renderGitHubHeatmap();
+    (function setupHeatmapDock(){
+      const panel = document.getElementById('ghHeatmap');
+      const drag  = document.getElementById('ghhm-drag');
+
+      const COLLAPSED_H = 180;
+      const MARGIN = 40; // safe margin top+bottom
+      const MIN_H = 150;
+      const SPEED = 1.8;
+      let isDragging = false, moved = false, startY = 0, startH = 0;
+      let raf = null, pendingH = null;
+
+      function viewportMaxH(){
+        return Math.max(MIN_H, window.innerHeight - MARGIN);
+      }
+      function clampH(h){
+        return Math.min(viewportMaxH(), Math.max(MIN_H, h));
+      }
+      function applyHeight(h){
+        pendingH = clampH(h);
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          panel.style.height = pendingH + 'px';
+          raf = null;
+        });
+      }
+
+      drag.addEventListener('pointerdown', (e)=>{
+        isDragging = true;
+        moved = false;
+        startY = e.clientY;
+        startH = panel.offsetHeight;
+        panel.classList.add('resizing');
+        document.body.style.userSelect = 'none';
+        drag.setPointerCapture(e.pointerId);
+      });
+
+      drag.addEventListener('pointermove', (e)=>{
+        if(!isDragging) return;
+        const dy = (startY - e.clientY) * SPEED;
+        if (Math.abs(dy) > 2) moved = true; // threshold
+        panel.classList.remove('expanded');
+        applyHeight(startH + dy);
+      });
+
+      function endDrag(e){
+        if(!isDragging) return;
+        isDragging = false;
+        panel.classList.remove('resizing');
+        document.body.style.userSelect = '';
+        try { drag.releasePointerCapture(e.pointerId); } catch {}
+
+        // If no real drag happened → treat as click toggle
+        if (!moved) {
+          const exp = panel.classList.toggle('expanded');
+          panel.style.height = exp ? viewportMaxH() + 'px' : COLLAPSED_H + 'px';
+        }
+      }
+      drag.addEventListener('pointerup', endDrag);
+      drag.addEventListener('pointercancel', endDrag);
+
+      // keep safe on resize
+      window.addEventListener('resize', ()=>{
+        const h = panel.offsetHeight;
+        const maxH = viewportMaxH();
+        if (h > maxH) panel.style.height = maxH + 'px';
+        if (panel.classList.contains('expanded')) panel.style.height = maxH + 'px';
+      });
+    })();
+    (function presenceLive() {
+      function presenceBase() {
+        const m = location.pathname.match(/^\/proxy\/(\d+)\//);
+        if (m) return `${location.origin}/proxy/${m[1]}`;
+        return location.origin;
+      }
+
+      const base = (window.PRESENCE_ORIGIN || presenceBase()).replace(/\/$/, "");
+      const u = new URL(base);
+      u.protocol = (u.protocol === "https:") ? "wss:" : "ws:";
+      const wsUrl = u.href.replace(/\/$/, "") + "/presence";
+      const httpUrl = base + "/online.json";
+
+      let ws;
+
+      function connect() {
+        ws = new WebSocket(wsUrl);
+        ws.addEventListener("message", (e) => {
+          try {
+            const payload = JSON.parse(e.data);
+            if (payload?.type === "online" && typeof payload.online === "number") {
+              renderProfileDots(payload.online);
+            }
+          } catch {}
+        });
+        ws.addEventListener("close", () => {
+          setTimeout(connect, 1500);
+        });
+      }
+
+      connect();
+
+      async function pollOnce() {
+        try {
+          const res = await fetch(httpUrl, { cache: "no-store" });
+          if (res.ok) {
+            const d = await res.json();
+            if (typeof d.online === "number") renderProfileDots(d.online);
+          }
+        } catch {}
+      }
+
+      pollOnce();
+      setInterval(pollOnce, 30000);
+    })();
+
+  })(); /* end outer IIFE */
+</script>
+</body>
+</html>
