@@ -281,7 +281,7 @@
       font-weight:800;font-size:12px; text-decoration:none;color:inherit; cursor:pointer;
     }
     .mega-card .btn:hover{background:rgba(255,255,255,.12)}
-    .blob.fly{position:fixed;left:0;top:0;z-index:100000;pointer-events:none;animation:none !important;transform-origin:center center;border-radius:50%}
+    .blob.fly{position:fixed;left:0;top:0;z-index:100000;pointer-events:none;animation:none !important;transform-origin:center center;border-radius:50%; will-change: transform, box-shadow;}
     .blob.fly.anim{transition:transform .7s cubic-bezier(.18,.9,.2,1),box-shadow .7s cubic-bezier(.18,.9,.2,1)}
 
     /* ===== Dock ===== */
@@ -587,7 +587,10 @@
   <div id="ghHeatmap" class="gh-heatmap" role="img" aria-label="GitHub contribution heatmap"></div>
   <script>
   window.PRESENCE_ORIGIN = "https://presence.makawejew.com";
+  const presenceBase = (window.PRESENCE_ORIGIN || location.origin).replace(/\/$/, "");
+  const presence = (p) => presenceBase + p;
 
+  // Beispiele
   (function () {
     const $  = (q, el = document) => el.querySelector(q);
     const $$ = (q, el = document) => [...el.querySelectorAll(q)];
@@ -669,25 +672,20 @@
     function applyHole(newIdx) {
       if (holeIdx === newIdx) return;
 
+      // restore previously hidden blob
       if (holeIdx >= 0) {
         const oldNode = $$('#ring .node')[holeIdx];
-        oldNode?.classList.remove('holed');
-        oldNode?.querySelector('.hole')?.remove();
         oldNode?.querySelector('.blob')?.style.removeProperty('visibility');
       }
 
+      // update index
       holeIdx = newIdx;
-      const node = $$('#ring .node')[holeIdx];
-      const petal = node?.querySelector('.petal');
-      const blob  = node?.querySelector('.blob');
-      if (!node || !petal || !blob) return;
 
-      if (!node.querySelector('.hole')) {
-        const hole = document.createElement('div');
-        hole.className = 'hole';
-        petal.appendChild(hole);
-      }
-      node.classList.add('holed');
+      // hide real blob at the new hole position (no placeholder element)
+      const node = $$('#ring .node')[holeIdx];
+      const blob = node?.querySelector('.blob');
+      if (!node || !blob) return;
+
       blob.style.visibility = 'hidden';
       hiddenBlob = blob;
     }
@@ -784,47 +782,65 @@
         activeBigEl = null;
       }
 
-      const srcBlob = document.querySelectorAll('#ring .node .blob')[holeIdx];
+      // Source is the blob currently nearest the 3-o’clock hole
+      const srcIndex = findHoleIndex();
+      const srcBlob  = document.querySelectorAll('#ring .node .blob')[srcIndex];
       if (!srcBlob || !bigEl) return;
 
-      applyHole(holeIdx);
-
+      // Measure BEFORE hiding anything
       const srcRect = srcBlob.getBoundingClientRect();
       const dstRect = bigEl.getBoundingClientRect();
+
+      // Make the gap at the hole
+      applyHole(srcIndex);
+
+      // Build the flyer at the destination box, then animate from source → dest
       const flyer = srcBlob.cloneNode(false);
       flyer.classList.add('fly');
-      document.body.appendChild(flyer);
-
+      flyer.style.zIndex = '100001';
+      flyer.style.left   = dstRect.left + 'px';
+      flyer.style.top    = dstRect.top  + 'px';
       flyer.style.width  = dstRect.width  + 'px';
       flyer.style.height = dstRect.height + 'px';
-      flyer.style.left   = dstRect.left   + 'px';
-      flyer.style.top    = dstRect.top    + 'px';
+      flyer.style.transformOrigin = '50% 50%';
+      document.body.appendChild(flyer);
 
+      // Hide the big card during the flight
+      bigEl.classList.add('hidden');
+
+      // Compute deltas (centers) & scale
       const dx = (srcRect.left + srcRect.width  / 2) - (dstRect.left + dstRect.width  / 2);
       const dy = (srcRect.top  + srcRect.height / 2) - (dstRect.top  + dstRect.height / 2);
       const sx = srcRect.width  / dstRect.width;
       const sy = srcRect.height / dstRect.height;
 
-      bigEl.classList.add('hidden');
-
-      flyer.style.transform = `translate(${dx}px,${dy}px) scale(${sx},${sy})`;
-      flyer.getBoundingClientRect();
-      flyer.classList.add('anim');
-      flyer.style.transform = 'translate(0,0) scale(1,1)';
+      // Animate with WAAPI → avoids rAF/class timing issues
+      const anim = flyer.animate(
+        [
+          { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+          { transform: 'translate(0, 0) scale(1, 1)' }
+        ],
+        {
+          duration: 700,
+          easing: 'cubic-bezier(.18,.9,.2,1)',
+          fill: 'both'
+        }
+      );
 
       activeFlyer = flyer;
       activeBigEl = bigEl;
 
       const finish = () => {
-        if (!activeFlyer || flyer !== activeFlyer) return;
+        if (flyer !== activeFlyer) return;
         bigEl.classList.remove('hidden');
         flyer.remove();
         activeFlyer = null;
         activeBigEl = null;
       };
 
-      flyer.addEventListener('transitionend', finish, { once: true });
-      setTimeout(finish, 900);
+      anim.addEventListener('finish', finish, { once: true });
+      // safety in case finish doesn’t fire (tab switch, etc.)
+      setTimeout(finish, 1000);
     }
 
     function update(initial = false) {
@@ -854,7 +870,9 @@
 
       applyHole(findHoleIndex());
 
-      if (!initial) flyPetalToExpanded(current, big);
+      if (!initial) {
+        requestAnimationFrame(() => flyPetalToExpanded(current, big));
+      }
     }
 
     const GH = { owner: "ShyBits", perRepo: 3, totalLimit: 10 };
@@ -871,7 +889,7 @@
       try {
         for (const page of [1,2]) {
           // 🚀 jetzt via Proxy statt direkt GitHub
-          const res = await fetch(`http://localhost:3000/events/${encodeURIComponent(login)}?page=${page}&per_page=100`);
+          const res = await fetch(presence(`/events/${encodeURIComponent(login)}?page=${page}&per_page=100`));
           if (!res.ok) break;
           const events = await res.json();
 
@@ -996,11 +1014,10 @@
 
       try {
         // ✨ Proxy statt direkter GitHub-Call
-        const res = await fetch("http://localhost:3000/github",
-        {
-          method: "POST",
-          headers: { "Content-Type":"application/json" },
-          body: JSON.stringify({ query, variables: { login: GH.owner } })
+        const res = await fetch(presence("/github"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query, variables: { login: GH.owner } })
         });
         if (!res.ok) throw new Error(`GraphQL ${res.status}`);
         const data = await res.json();
@@ -1253,6 +1270,8 @@
       else ring.classList.remove('is-hovering');
     }
 
+    const ENABLE_TILT = false; // master switch
+
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isCoarse = window.matchMedia('(pointer: coarse)').matches;
     const tiltTarget = orbit;
@@ -1289,7 +1308,8 @@
       if (!rafId) rafId = requestAnimationFrame(tiltTick);
     }
 
-    if (!prefersReduced && !isCoarse) {
+    // ✅ only attach if explicitly enabled
+    if (ENABLE_TILT && !prefersReduced && !isCoarse) {
       orbit.addEventListener('mousemove', onPointerMove);
       orbit.addEventListener('mouseleave', onPointerLeave);
     }
