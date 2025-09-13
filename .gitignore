@@ -1,3 +1,7 @@
 # ignore env files
+<<<<<<< HEAD
 .env
 .env
+=======
+.env
+>>>>>>> 70d0d66 (update)

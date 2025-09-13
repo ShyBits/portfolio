@@ -11,5 +11,10 @@
     "dotenv": "^17.2.2",
     "express": "^4.21.2",
     "ws": "^8.18.3"
-  }
+  },
+  "description": "",
+  "main": "proxy.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
